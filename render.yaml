@@ -1,12 +1,12 @@
 databases:
-  - name: rails-regimen-db
+  - name: jaspo-regimen-db
     plan: free
-    databaseName: rails_regimen_master_production
-    user: rails_regimen
+    databaseName: jaspo_regimen_master_production
+    user: jaspo_regimen
 
 services:
   - type: web
-    name: rails-regimen-master
+    name: jaspo-regimen-master
     runtime: ruby
     plan: free
     buildCommand: ./bin/render-build.sh
@@ -14,7 +14,7 @@ services:
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: rails-regimen-db
+          name: jaspo-regimen-db
           property: connectionString
       - key: RAILS_ENV
         value: production
