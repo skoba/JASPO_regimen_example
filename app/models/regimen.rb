@@ -57,6 +57,34 @@ class Regimen < ApplicationRecord
     regimen_drugs.includes(:drug).order(:sequence_number)
   end
 
+  # FHIR PlanDefinition 形式で出力
+  def to_fhir
+    resource = {
+      resourceType: 'PlanDefinition',
+      id: id.to_s,
+      status: 'active',
+      title: full_name,
+      type: {
+        coding: [{
+          system: 'http://terminology.hl7.org/CodeSystem/plan-definition-type',
+          code: 'clinical-protocol',
+          display: 'Clinical Protocol'
+        }]
+      },
+      useContext: [{
+        code: {
+          system: 'http://terminology.hl7.org/CodeSystem/usage-context-type',
+          code: 'focus'
+        },
+        valueCodeableConcept: cancer_type.to_fhir_codeable_concept
+      }],
+      extension: fhir_cycle_extensions,
+      action: regimen_drugs.order(:sequence_number).map { |rd| fhir_action_for(rd) }
+    }
+    resource.delete(:extension) if resource[:extension].empty?
+    resource
+  end
+
   # レジメン詳細のサマリー
   def summary
     ordered_drugs.map do |rd|
@@ -75,6 +103,70 @@ class Regimen < ApplicationRecord
   end
 
   private
+
+  ROUTE_CODINGS = {
+    'IV'  => { system: 'http://snomed.info/sct', code: '47625008', display: 'Intravenous route' },
+    'PO'  => { system: 'http://snomed.info/sct', code: '26643006', display: 'Oral route' },
+    'SC'  => { system: 'http://snomed.info/sct', code: '34206005', display: 'Subcutaneous route' },
+    'IM'  => { system: 'http://snomed.info/sct', code: '78421000', display: 'Intramuscular route' }
+  }.freeze
+
+  def fhir_cycle_extensions
+    extensions = []
+    if cycle_days
+      extensions << {
+        url: 'http://example.com/fhir/StructureDefinition/cycle-days',
+        valueInteger: cycle_days
+      }
+    end
+    if total_cycles
+      extensions << {
+        url: 'http://example.com/fhir/StructureDefinition/total-cycles',
+        valueInteger: total_cycles
+      }
+    end
+    extensions
+  end
+
+  def fhir_action_for(regimen_drug)
+    drug = regimen_drug.drug
+    action = {
+      title: [drug.generic_name, drug.abbreviation].compact.join(' / '),
+      code: [drug.to_fhir_codeable_concept]
+    }
+
+    route_coding = ROUTE_CODINGS[regimen_drug.route]
+    action[:action] = regimen_drug.regimen_drug_schedules.map do |schedule|
+      dosage = {
+        timing: {
+          repeat: {
+            boundsDuration: cycle_days ? { value: cycle_days, unit: 'd', system: 'http://unitsofmeasure.org', code: 'd' } : nil,
+            offset: schedule.start_day == schedule.end_day ? (schedule.start_day - 1) * 24 * 60 : nil
+          }.compact
+        }
+      }
+
+      unless schedule.start_day == schedule.end_day
+        dosage[:timing][:repeat][:count] = schedule.schedule_timings.count * schedule.administration_days.length
+      end
+
+      dosage[:route] = { coding: [route_coding] } if route_coding
+      dosage[:doseAndRate] = schedule.schedule_timings.order(:sequence).map do |st|
+        rate = { doseQuantity: { value: st.dose_per_time, unit: st.dose_unit } }
+        if st.timing_code
+          dosage[:timing][:repeat][:when] = [st.timing_code.to_fhir_when]
+        end
+        rate
+      end
+
+      {
+        title: "Day #{schedule.start_day}#{schedule.start_day == schedule.end_day ? '' : "-#{schedule.end_day}"}",
+        dosage: [dosage]
+      }
+    end
+
+    action
+  end
 
   def unique_regimen_combination
     existing = Regimen.where(

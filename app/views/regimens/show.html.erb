@@ -90,3 +90,9 @@
     </div>
   <% end %>
 </div>
+
+<div class="card" style="margin-top: 30px;">
+  <div class="card-header">FHIRサンプルインスタンス（PlanDefinition）</div>
+  <p style="color: #666; font-size: 13px; margin-bottom: 15px;">注：このJSONはFHIR R4 PlanDefinitionリソースのサンプルです。</p>
+  <pre style="background-color: #f4f4f4; padding: 20px; border-radius: 4px; overflow-x: auto; font-size: 13px; line-height: 1.5;"><code><%= JSON.pretty_generate(@regimen.to_fhir) %></code></pre>
+</div>
