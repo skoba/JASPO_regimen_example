@@ -1,0 +1,56 @@
+<h2>レジメン一覧</h2>
+
+<p style="margin-bottom: 20px; color: #666;">
+  登録されているレジメン: <strong><%= @regimens.count %></strong> 件
+</p>
+
+<% @regimens_by_cancer_type.each do |cancer_type, regimens| %>
+  <div class="section">
+    <h3><%= cancer_type.name %></h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>テンプレート</th>
+          <th>治療ライン</th>
+          <th>サイクル日数</th>
+          <th>総サイクル数</th>
+          <th>エビデンスレベル</th>
+          <th>出典</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% regimens.each do |regimen| %>
+          <tr>
+            <td>
+              <%= link_to regimen.regimen_template.name, regimen_template_path(regimen.regimen_template) %>
+            </td>
+            <td>
+              <span class="badge badge-primary"><%= regimen.line_of_therapy %></span>
+            </td>
+            <td><%= regimen.cycle_days %> 日</td>
+            <td><%= regimen.total_cycles ? "#{regimen.total_cycles} サイクル" : '-' %></td>
+            <td>
+              <span class="badge badge-success"><%= regimen.evidence_level %></span>
+            </td>
+            <td>
+              <% if regimen.reference_edition %>
+                <%= regimen.reference_edition.reference_source.name %>
+                <%= regimen.reference_edition.edition_number %>
+                <% if regimen.page_reference %>
+                  (<%= regimen.page_reference %>)
+                <% end %>
+              <% else %>
+                -
+              <% end %>
+            </td>
+            <td>
+              <%= link_to '詳細', regimen_path(regimen) %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>

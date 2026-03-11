@@ -1,0 +1,32 @@
+<h2>レジメンテンプレート一覧</h2>
+
+<p style="margin-bottom: 20px; color: #666;">
+  登録されているテンプレート: <strong><%= @regimen_templates.count %></strong> 件
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>テンプレート名</th>
+      <th>説明</th>
+      <th>レジメン数</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @regimen_templates.each do |template| %>
+      <tr>
+        <td>
+          <strong><%= template.name %></strong>
+        </td>
+        <td><%= template.description %></td>
+        <td>
+          <span class="badge badge-info"><%= template.regimens.count %> 件</span>
+        </td>
+        <td>
+          <%= link_to '詳細', regimen_template_path(template) %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

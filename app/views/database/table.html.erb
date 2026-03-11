@@ -1,0 +1,126 @@
+<%= link_to '← スキーマ一覧に戻る', database_schema_path, class: 'back-link' %>
+
+<h2><%= @table_name %> テーブル</h2>
+
+<div class="card">
+  <div class="card-header">
+    テーブル情報
+    <span class="badge badge-info"><%= @total_count %> 件のレコード</span>
+  </div>
+
+  <dl>
+    <dt>カラム数</dt>
+    <dd><%= @columns.count %></dd>
+
+    <dt>外部キー</dt>
+    <dd>
+      <% if @foreign_keys.any? %>
+        <ul style="margin: 5px 0 0 20px;">
+          <% @foreign_keys.each do |fk| %>
+            <li>
+              <%= fk.column %> →
+              <%= link_to fk.to_table, database_table_path(fk.to_table) %>.<%= fk.primary_key %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        なし
+      <% end %>
+    </dd>
+  </dl>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    データ一覧
+    <% if @total_pages > 1 %>
+      <span style="float: right; font-weight: normal; font-size: 14px;">
+        ページ <%= @page %> / <%= @total_pages %>
+      </span>
+    <% end %>
+  </div>
+
+  <% if @data.any? %>
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <% @columns.each do |col| %>
+              <th style="white-space: nowrap;">
+                <%= col.name %>
+                <br>
+                <small style="font-weight: normal; color: rgba(255,255,255,0.8);">
+                  <%= col.sql_type %>
+                </small>
+              </th>
+            <% end %>
+          </tr>
+        </thead>
+        <tbody>
+          <% @data.each do |row| %>
+            <tr>
+              <% @columns.each do |col| %>
+                <td>
+                  <% value = row[col.name] %>
+                  <% if value.nil? %>
+                    <span style="color: #999; font-style: italic;">NULL</span>
+                  <% elsif value.is_a?(String) && value.length > 100 %>
+                    <%= truncate(value, length: 100) %>
+                  <% elsif value.is_a?(Time) || value.is_a?(Date) %>
+                    <%= value.strftime('%Y-%m-%d %H:%M:%S') %>
+                  <% else %>
+                    <%= value %>
+                  <% end %>
+
+                  <% if col.name.end_with?('_id') && !value.nil? %>
+                    <% fk = @foreign_keys.find { |f| f.column == col.name } %>
+                    <% if fk %>
+                      <br>
+                      <small>
+                        <%= link_to "→ #{fk.to_table}", database_table_path(fk.to_table), style: 'color: #3498db;' %>
+                      </small>
+                    <% end %>
+                  <% end %>
+                </td>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ページネーション -->
+    <% if @total_pages > 1 %>
+      <div style="margin-top: 20px; text-align: center;">
+        <% if @page > 1 %>
+          <%= link_to '« 前へ', database_table_path(@table_name, page: @page - 1), style: 'margin: 0 10px; padding: 8px 16px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px;' %>
+        <% end %>
+
+        <span style="margin: 0 20px;">
+          <%= @page %> / <%= @total_pages %>
+        </span>
+
+        <% if @page < @total_pages %>
+          <%= link_to '次へ »', database_table_path(@table_name, page: @page + 1), style: 'margin: 0 10px; padding: 8px 16px; background-color: #3498db; color: white; text-decoration: none; border-radius: 4px;' %>
+        <% end %>
+      </div>
+
+      <!-- ページジャンプ -->
+      <div style="margin-top: 15px; text-align: center;">
+        <form action="<%= database_table_path(@table_name) %>" method="get" style="display: inline;">
+          <label for="page">ページへ移動:</label>
+          <input type="number" name="page" id="page" value="<%= @page %>" min="1" max="<%= @total_pages %>" style="width: 80px; padding: 4px; border: 1px solid #ddd; border-radius: 4px;">
+          <button type="submit" style="padding: 4px 12px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">移動</button>
+        </form>
+      </div>
+    <% end %>
+  <% else %>
+    <p style="padding: 20px; color: #666; text-align: center;">
+      このテーブルにはデータがありません。
+    </p>
+  <% end %>
+</div>
+
+<div style="margin-top: 20px;">
+  <%= link_to '← スキーマ一覧に戻る', database_schema_path, class: 'back-link' %>
+</div>

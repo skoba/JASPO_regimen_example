@@ -1,0 +1,267 @@
+<h2>データベーススキーマ情報</h2>
+
+<div style="margin-bottom: 30px;">
+  <ul style="list-style: none; padding: 0;">
+    <li style="display: inline-block; margin-right: 20px;">
+      <%= link_to '📊 ER図を表示', '#er-diagram', style: 'text-decoration: none; font-size: 16px;' %>
+    </li>
+    <li style="display: inline-block;">
+      <%= link_to '📋 テーブル一覧', '#tables', style: 'text-decoration: none; font-size: 16px;' %>
+    </li>
+  </ul>
+</div>
+
+<!-- ER図セクション -->
+<div class="section" id="er-diagram">
+  <h3>ER図（Entity-Relationship Diagram）</h3>
+
+  <div class="card">
+    <div style="overflow-x: auto;">
+      <pre class="mermaid" style="background-color: white;">
+erDiagram
+    CODE_SYSTEMS ||--o{ DRUG_CODES : "has"
+    CODE_SYSTEMS ||--o{ CANCER_TYPE_CODES : "has"
+
+    DRUGS ||--o{ DRUG_CODES : "has"
+    DRUGS ||--o{ REGIMEN_DRUGS : "used in"
+
+    CANCER_TYPES ||--o{ CANCER_TYPE_CODES : "has"
+    CANCER_TYPES ||--o{ REGIMENS : "treated with"
+
+    REFERENCE_SOURCES ||--o{ REFERENCE_EDITIONS : "has"
+    REFERENCE_EDITIONS ||--o{ REGIMENS : "documented in"
+
+    REGIMEN_TEMPLATES ||--o{ REGIMENS : "instances"
+
+    REGIMENS ||--o{ REGIMEN_DRUGS : "contains"
+
+    REGIMEN_DRUGS ||--o{ REGIMEN_DRUG_SCHEDULES : "scheduled as"
+
+    REGIMEN_DRUG_SCHEDULES ||--o{ SCHEDULE_TIMINGS : "timing"
+
+    TIMING_CODES ||--o{ SCHEDULE_TIMINGS : "defines"
+
+    CODE_SYSTEMS {
+        string id PK
+        string name
+        string uri
+        string version
+        datetime created_at
+        datetime updated_at
+    }
+
+    DRUGS {
+        bigint id PK
+        string generic_name
+        string brand_name
+        string abbreviation
+        datetime created_at
+        datetime updated_at
+    }
+
+    DRUG_CODES {
+        bigint id PK
+        bigint drug_id FK
+        string code_system_id FK
+        string code
+        string display
+        datetime created_at
+        datetime updated_at
+    }
+
+    CANCER_TYPES {
+        bigint id PK
+        string name
+        datetime created_at
+        datetime updated_at
+    }
+
+    CANCER_TYPE_CODES {
+        bigint id PK
+        bigint cancer_type_id FK
+        string code_system_id FK
+        string code
+        string display
+        datetime created_at
+        datetime updated_at
+    }
+
+    REFERENCE_SOURCES {
+        bigint id PK
+        string name
+        string source_type
+        string publisher
+        string isbn
+        string url
+        datetime created_at
+        datetime updated_at
+    }
+
+    REFERENCE_EDITIONS {
+        bigint id PK
+        bigint reference_source_id FK
+        string edition_number
+        date publication_date
+        date effective_date
+        datetime created_at
+        datetime updated_at
+    }
+
+    REGIMEN_TEMPLATES {
+        bigint id PK
+        string name
+        text description
+        datetime created_at
+        datetime updated_at
+    }
+
+    TIMING_CODES {
+        bigint id PK
+        string code
+        string display
+        string fhir_when_code
+        integer sort_order
+        datetime created_at
+        datetime updated_at
+    }
+
+    REGIMENS {
+        bigint id PK
+        bigint regimen_template_id FK
+        bigint cancer_type_id FK
+        bigint reference_edition_id FK
+        string line_of_therapy
+        integer cycle_days
+        integer total_cycles
+        string evidence_level
+        string page_reference
+        datetime created_at
+        datetime updated_at
+    }
+
+    REGIMEN_DRUGS {
+        bigint id PK
+        bigint regimen_id FK
+        bigint drug_id FK
+        string route
+        integer duration_min
+        integer duration_max
+        integer sequence_number
+        datetime created_at
+        datetime updated_at
+    }
+
+    REGIMEN_DRUG_SCHEDULES {
+        bigint id PK
+        bigint regimen_drug_id FK
+        integer start_day
+        integer end_day
+        integer interval_days
+        datetime created_at
+        datetime updated_at
+    }
+
+    SCHEDULE_TIMINGS {
+        bigint id PK
+        bigint regimen_drug_schedule_id FK
+        bigint timing_code_id FK
+        integer sequence
+        decimal dose_per_time
+        string dose_unit
+        datetime created_at
+        datetime updated_at
+    }
+      </pre>
+    </div>
+  </div>
+</div>
+
+<!-- テーブル一覧セクション -->
+<div class="section" id="tables">
+  <h3>テーブル一覧（全 <%= @tables.count %> テーブル）</h3>
+
+  <% @tables.each do |table| %>
+    <div class="card">
+      <div class="card-header">
+        <%= link_to table[:name], database_table_path(table[:name]), style: 'color: #2c3e50; text-decoration: none; font-weight: 600;' %>
+        <span class="badge badge-info"><%= table[:columns].count %> カラム</span>
+        <%= link_to 'データを表示 →', database_table_path(table[:name]), style: 'float: right; color: #3498db; text-decoration: none; font-size: 14px;' %>
+      </div>
+
+      <table style="margin-bottom: 0;">
+        <thead>
+          <tr>
+            <th style="width: 30%;">カラム名</th>
+            <th style="width: 20%;">型</th>
+            <th style="width: 10%;">NULL</th>
+            <th style="width: 20%;">デフォルト値</th>
+            <th style="width: 20%;">備考</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% table[:columns].each do |col| %>
+            <tr>
+              <td>
+                <strong><%= col[:name] %></strong>
+                <% if col[:primary] %>
+                  <span class="badge badge-primary">PK</span>
+                <% end %>
+              </td>
+              <td><code><%= col[:type] %></code></td>
+              <td><%= col[:null] ? '✓' : '✗' %></td>
+              <td><%= col[:default] || '-' %></td>
+              <td>
+                <% fk = table[:foreign_keys].find { |f| f[:column] == col[:name] } %>
+                <% if fk %>
+                  <span class="badge badge-success">FK → <%= fk[:to_table] %></span>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <% if table[:indexes].any? %>
+        <div style="margin-top: 15px; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
+          <strong>インデックス:</strong>
+          <ul style="margin: 5px 0 0 20px;">
+            <% table[:indexes].each do |idx| %>
+              <li>
+                <%= idx[:name] %>
+                (<%= Array(idx[:columns]).join(', ') %>)
+                <% if idx[:unique] %>
+                  <span class="badge badge-info">UNIQUE</span>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <% if table[:foreign_keys].any? %>
+        <div style="margin-top: 10px; padding: 10px; background-color: #e8f5e9; border-radius: 4px;">
+          <strong>外部キー:</strong>
+          <ul style="margin: 5px 0 0 20px;">
+            <% table[:foreign_keys].each do |fk| %>
+              <li>
+                <%= fk[:column] %> → <%= fk[:to_table] %>.<%= fk[:primary_key] %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<!-- Mermaid.jsの読み込み -->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    er: {
+      useMaxWidth: true
+    }
+  });
+</script>

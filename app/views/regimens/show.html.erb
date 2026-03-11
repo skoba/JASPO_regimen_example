@@ -1,0 +1,92 @@
+<%= link_to '← レジメン一覧に戻る', regimens_path, class: 'back-link' %>
+
+<h2><%= @regimen.regimen_template.name %></h2>
+
+<div class="card">
+  <div class="card-header">基本情報</div>
+
+  <dl>
+    <dt>がん腫</dt>
+    <dd><%= @regimen.cancer_type.name %></dd>
+
+    <dt>治療ライン</dt>
+    <dd><span class="badge badge-primary"><%= @regimen.line_of_therapy %></span></dd>
+
+    <dt>サイクル日数</dt>
+    <dd><%= @regimen.cycle_days %> 日</dd>
+
+    <dt>総サイクル数</dt>
+    <dd><%= @regimen.total_cycles ? "#{@regimen.total_cycles} サイクル" : '規定なし' %></dd>
+
+    <dt>エビデンスレベル</dt>
+    <dd><span class="badge badge-success"><%= @regimen.evidence_level %></span></dd>
+
+    <% if @regimen.reference_edition %>
+      <dt>出典</dt>
+      <dd>
+        <%= @regimen.reference_edition.reference_source.name %>
+        <%= @regimen.reference_edition.edition_number %>
+        (<%= @regimen.reference_edition.publication_date.strftime('%Y年%m月') %>)
+        <% if @regimen.page_reference %>
+          - <%= @regimen.page_reference %>
+        <% end %>
+      </dd>
+    <% end %>
+  </dl>
+</div>
+
+<div class="card">
+  <div class="card-header">投薬スケジュール</div>
+
+  <% @regimen.regimen_drugs.order(:sequence_number).each do |regimen_drug| %>
+    <div class="drug-schedule">
+      <h4 style="color: #3498db; margin: 15px 0 10px 0;">
+        <%= regimen_drug.drug.generic_name %>
+        <% if regimen_drug.drug.abbreviation %>
+          (<%= regimen_drug.drug.abbreviation %>)
+        <% end %>
+        <% if regimen_drug.drug.brand_name %>
+          - <%= regimen_drug.drug.brand_name %>
+        <% end %>
+      </h4>
+
+      <dl>
+        <dt>投与経路</dt>
+        <dd><%= regimen_drug.route %></dd>
+
+        <% if regimen_drug.duration_min %>
+          <dt>投与時間</dt>
+          <dd>
+            <%= regimen_drug.duration_min %> 分
+            <% if regimen_drug.duration_max && regimen_drug.duration_max != regimen_drug.duration_min %>
+              〜 <%= regimen_drug.duration_max %> 分
+            <% end %>
+          </dd>
+        <% end %>
+      </dl>
+
+      <% regimen_drug.regimen_drug_schedules.each do |schedule| %>
+        <div style="margin-left: 20px; margin-top: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
+          <strong>投与日:</strong>
+          <% if schedule.start_day == schedule.end_day %>
+            Day <%= schedule.start_day %>
+          <% else %>
+            Day <%= schedule.start_day %> 〜 Day <%= schedule.end_day %>
+            <% if schedule.interval_days && schedule.interval_days > 1 %>
+              (<%= schedule.interval_days %>日ごと)
+            <% end %>
+          <% end %>
+
+          <% schedule.schedule_timings.order(:sequence).each do |timing| %>
+            <div style="margin-top: 8px;">
+              <% if timing.timing_code %>
+                <span class="badge badge-info"><%= timing.timing_code.display %></span>
+              <% end %>
+              <strong><%= timing.dose_per_time %> <%= timing.dose_unit %></strong>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

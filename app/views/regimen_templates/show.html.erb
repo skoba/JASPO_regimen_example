@@ -1,0 +1,66 @@
+<%= link_to '← テンプレート一覧に戻る', regimen_templates_path, class: 'back-link' %>
+
+<h2><%= @regimen_template.name %></h2>
+
+<div class="card">
+  <div class="card-header">テンプレート情報</div>
+
+  <dl>
+    <dt>説明</dt>
+    <dd><%= @regimen_template.description %></dd>
+
+    <dt>レジメン数</dt>
+    <dd><span class="badge badge-info"><%= @regimen_template.regimens.count %> 件</span></dd>
+  </dl>
+</div>
+
+<div class="card">
+  <div class="card-header">このテンプレートを使用しているレジメン</div>
+
+  <% if @regimen_template.regimens.any? %>
+    <table>
+      <thead>
+        <tr>
+          <th>がん腫</th>
+          <th>治療ライン</th>
+          <th>サイクル日数</th>
+          <th>総サイクル数</th>
+          <th>エビデンスレベル</th>
+          <th>出典</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @regimen_template.regimens.each do |regimen| %>
+          <tr>
+            <td><%= regimen.cancer_type.name %></td>
+            <td>
+              <span class="badge badge-primary"><%= regimen.line_of_therapy %></span>
+            </td>
+            <td><%= regimen.cycle_days %> 日</td>
+            <td><%= regimen.total_cycles ? "#{regimen.total_cycles} サイクル" : '-' %></td>
+            <td>
+              <span class="badge badge-success"><%= regimen.evidence_level %></span>
+            </td>
+            <td>
+              <% if regimen.reference_edition %>
+                <%= regimen.reference_edition.reference_source.name %>
+                <%= regimen.reference_edition.edition_number %>
+                <% if regimen.page_reference %>
+                  (<%= regimen.page_reference %>)
+                <% end %>
+              <% else %>
+                -
+              <% end %>
+            </td>
+            <td>
+              <%= link_to '詳細', regimen_path(regimen) %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p style="color: #666;">このテンプレートを使用しているレジメンはまだ登録されていません。</p>
+  <% end %>
+</div>
