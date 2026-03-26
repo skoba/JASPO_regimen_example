@@ -489,75 +489,167 @@ end
 # ==========================================
 puts '  Creating additional regimens...'
 
-Regimen.find_or_create_by!(
+folfox = Regimen.find_or_create_by!(
   regimen_template: templates['FOLFOX療法'],
   cancer_type: cancer_types['大腸がん'],
   reference_edition: edition_8,
   line_of_therapy: '1st'
 ) { |r| r.cycle_days = 14; r.total_cycles = 12; r.evidence_level = 'A'; r.page_reference = 'p.45' }
 
-Regimen.find_or_create_by!(
+[
+  { drug: drugs['oxaliplatin'],   route: 'IV', duration_min: 120, seq: 1 },
+  { drug: drugs['leucovorin'],    route: 'IV', duration_min: 120, seq: 2 },
+  { drug: drugs['fluorouracil'],  route: 'IV', duration_min: 46 * 60, seq: 3 }
+].each do |d|
+  RegimenDrug.find_or_create_by!(regimen: folfox, drug: d[:drug]) do |rd|
+    rd.route = d[:route]; rd.duration_min = d[:duration_min]; rd.sequence_number = d[:seq]
+  end
+end
+
+folfiri = Regimen.find_or_create_by!(
   regimen_template: templates['FOLFIRI療法'],
   cancer_type: cancer_types['大腸がん'],
   reference_edition: edition_8,
   line_of_therapy: '2nd'
 ) { |r| r.cycle_days = 14; r.total_cycles = 12; r.evidence_level = 'A'; r.page_reference = 'p.48' }
 
-Regimen.find_or_create_by!(
+[
+  { drug: drugs['irinotecan'],    route: 'IV', duration_min: 90, seq: 1 },
+  { drug: drugs['leucovorin'],    route: 'IV', duration_min: 120, seq: 2 },
+  { drug: drugs['fluorouracil'],  route: 'IV', duration_min: 46 * 60, seq: 3 }
+].each do |d|
+  RegimenDrug.find_or_create_by!(regimen: folfiri, drug: d[:drug]) do |rd|
+    rd.route = d[:route]; rd.duration_min = d[:duration_min]; rd.sequence_number = d[:seq]
+  end
+end
+
+ac = Regimen.find_or_create_by!(
   regimen_template: templates['AC療法'],
   cancer_type: cancer_types['乳がん'],
   reference_edition: edition_8,
   line_of_therapy: 'adjuvant'
 ) { |r| r.cycle_days = 21; r.total_cycles = 4; r.evidence_level = 'A'; r.page_reference = 'p.156' }
 
-Regimen.find_or_create_by!(
+[
+  { drug: drugs['doxorubicin'],       route: 'IV', duration_min: 15, seq: 1 },
+  { drug: drugs['cyclophosphamide'],  route: 'IV', duration_min: 30, seq: 2 }
+].each do |d|
+  RegimenDrug.find_or_create_by!(regimen: ac, drug: d[:drug]) do |rd|
+    rd.route = d[:route]; rd.duration_min = d[:duration_min]; rd.sequence_number = d[:seq]
+  end
+end
+
+tc = Regimen.find_or_create_by!(
   regimen_template: templates['TC療法'],
   cancer_type: cancer_types['乳がん'],
   reference_edition: edition_8,
   line_of_therapy: 'adjuvant'
 ) { |r| r.cycle_days = 21; r.total_cycles = 4; r.evidence_level = 'A'; r.page_reference = 'p.158' }
 
-Regimen.find_or_create_by!(
+[
+  { drug: drugs['docetaxel'],         route: 'IV', duration_min: 60,  seq: 1 },
+  { drug: drugs['cyclophosphamide'],  route: 'IV', duration_min: 30,  seq: 2 }
+].each do |d|
+  RegimenDrug.find_or_create_by!(regimen: tc, drug: d[:drug]) do |rd|
+    rd.route = d[:route]; rd.duration_min = d[:duration_min]; rd.sequence_number = d[:seq]
+  end
+end
+
+xelox = Regimen.find_or_create_by!(
   regimen_template: templates['XELOX療法'],
   cancer_type: cancer_types['胃がん'],
   reference_edition: edition_8,
   line_of_therapy: '1st'
 ) { |r| r.cycle_days = 21; r.total_cycles = 8; r.evidence_level = 'A'; r.page_reference = 'p.92' }
 
-Regimen.find_or_create_by!(
+[
+  { drug: drugs['oxaliplatin'],   route: 'IV', duration_min: 120, seq: 1 },
+  { drug: drugs['capecitabine'],  route: 'PO', duration_min: nil, seq: 2 }
+].each do |d|
+  RegimenDrug.find_or_create_by!(regimen: xelox, drug: d[:drug]) do |rd|
+    rd.route = d[:route]; rd.duration_min = d[:duration_min]; rd.sequence_number = d[:seq]
+  end
+end
+
+gc = Regimen.find_or_create_by!(
   regimen_template: templates['GC療法'],
   cancer_type: cancer_types['膀胱がん'],
   reference_edition: edition_8,
   line_of_therapy: '1st'
 ) { |r| r.cycle_days = 21; r.total_cycles = 6; r.evidence_level = 'A'; r.page_reference = 'p.234' }
 
-Regimen.find_or_create_by!(
+[
+  { drug: drugs['gemcitabine'], route: 'IV', duration_min: 30,  seq: 1 },
+  { drug: drugs['cisplatin'],   route: 'IV', duration_min: 120, seq: 2 }
+].each do |d|
+  RegimenDrug.find_or_create_by!(regimen: gc, drug: d[:drug]) do |rd|
+    rd.route = d[:route]; rd.duration_min = d[:duration_min]; rd.sequence_number = d[:seq]
+  end
+end
+
+cbdca_ptx = Regimen.find_or_create_by!(
   regimen_template: templates['カルボプラチン+パクリタキセル療法'],
   cancer_type: cancer_types['卵巣がん'],
   reference_edition: edition_8,
   line_of_therapy: '1st'
 ) { |r| r.cycle_days = 21; r.total_cycles = 6; r.evidence_level = 'A'; r.page_reference = 'p.189' }
 
-Regimen.find_or_create_by!(
+[
+  { drug: drugs['paclitaxel'],  route: 'IV', duration_min: 180, seq: 1 },
+  { drug: drugs['carboplatin'], route: 'IV', duration_min: 60,  seq: 2 }
+].each do |d|
+  RegimenDrug.find_or_create_by!(regimen: cbdca_ptx, drug: d[:drug]) do |rd|
+    rd.route = d[:route]; rd.duration_min = d[:duration_min]; rd.sequence_number = d[:seq]
+  end
+end
+
+chop = Regimen.find_or_create_by!(
   regimen_template: templates['CHOP療法'],
   cancer_type: cancer_types['悪性リンパ腫'],
   reference_edition: edition_8,
   line_of_therapy: '1st'
 ) { |r| r.cycle_days = 21; r.total_cycles = 6; r.evidence_level = 'A'; r.page_reference = 'p.278' }
 
-Regimen.find_or_create_by!(
+[
+  { drug: drugs['cyclophosphamide'], route: 'IV', duration_min: 30, seq: 1 },
+  { drug: drugs['doxorubicin'],      route: 'IV', duration_min: 15, seq: 2 },
+  { drug: drugs['vincristine'],      route: 'IV', duration_min: 10, seq: 3 },
+  { drug: drugs['prednisolone'],     route: 'PO', duration_min: nil, seq: 4 }
+].each do |d|
+  RegimenDrug.find_or_create_by!(regimen: chop, drug: d[:drug]) do |rd|
+    rd.route = d[:route]; rd.duration_min = d[:duration_min]; rd.sequence_number = d[:seq]
+  end
+end
+
+rchop = Regimen.find_or_create_by!(
   regimen_template: templates['R-CHOP療法'],
   cancer_type: cancer_types['悪性リンパ腫'],
   reference_edition: edition_8,
   line_of_therapy: '1st'
 ) { |r| r.cycle_days = 21; r.total_cycles = 6; r.evidence_level = 'A'; r.page_reference = 'p.280' }
 
-Regimen.find_or_create_by!(
+[
+  { drug: drugs['rituximab'],        route: 'IV', duration_min: 90, seq: 1 },
+  { drug: drugs['cyclophosphamide'], route: 'IV', duration_min: 30, seq: 2 },
+  { drug: drugs['doxorubicin'],      route: 'IV', duration_min: 15, seq: 3 },
+  { drug: drugs['vincristine'],      route: 'IV', duration_min: 10, seq: 4 },
+  { drug: drugs['prednisolone'],     route: 'PO', duration_min: nil, seq: 5 }
+].each do |d|
+  RegimenDrug.find_or_create_by!(regimen: rchop, drug: d[:drug]) do |rd|
+    rd.route = d[:route]; rd.duration_min = d[:duration_min]; rd.sequence_number = d[:seq]
+  end
+end
+
+pembro = Regimen.find_or_create_by!(
   regimen_template: templates['ペムブロリズマブ単独療法'],
   cancer_type: cancer_types['非小細胞肺がん'],
   reference_edition: edition_8,
   line_of_therapy: '1st'
 ) { |r| r.cycle_days = 21; r.evidence_level = 'A'; r.page_reference = 'p.138' }
+
+RegimenDrug.find_or_create_by!(regimen: pembro, drug: drugs['pembrolizumab']) do |rd|
+  rd.route = 'IV'; rd.duration_min = 30; rd.sequence_number = 1
+end
 
 puts 'Seeding completed!'
 puts ''

@@ -1,7 +1,20 @@
 <h2>レジメン一覧</h2>
 
+<%= form_with url: regimens_path, method: :get, local: true, style: "margin-bottom: 16px; display: flex; gap: 8px; align-items: center;" do |f| %>
+  <%= f.text_field :drug_name, value: @drug_name, placeholder: "薬剤名で検索（一般名・商品名・略語）",
+      style: "padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; width: 300px;" %>
+  <%= f.submit "検索", style: "padding: 6px 14px; cursor: pointer;" %>
+  <% if @drug_name.present? %>
+    <%= link_to "クリア", regimens_path, style: "color: #666; font-size: 0.9em;" %>
+  <% end %>
+<% end %>
+
 <p style="margin-bottom: 20px; color: #666;">
-  登録されているレジメン: <strong><%= @regimens.count %></strong> 件
+  <% if @drug_name.present? %>
+    「<strong><%= @drug_name %></strong>」を含むレジメン: <strong><%= @regimens.count %></strong> 件
+  <% else %>
+    登録されているレジメン: <strong><%= @regimens.count %></strong> 件
+  <% end %>
 </p>
 
 <% @regimens_by_cancer_type.each do |cancer_type, regimens| %>
@@ -12,6 +25,7 @@
       <thead>
         <tr>
           <th>テンプレート</th>
+          <th>構成薬剤</th>
           <th>治療ライン</th>
           <th>サイクル日数</th>
           <th>総サイクル数</th>
@@ -25,6 +39,9 @@
           <tr>
             <td>
               <%= link_to regimen.regimen_template.name, regimen_template_path(regimen.regimen_template) %>
+            </td>
+            <td style="font-size: 0.9em;">
+              <%= regimen.regimen_drugs.sort_by(&:sequence_number).map { |rd| rd.drug.abbreviation.presence || rd.drug.generic_name }.join(' + ') %>
             </td>
             <td>
               <span class="badge badge-primary"><%= regimen.line_of_therapy %></span>
