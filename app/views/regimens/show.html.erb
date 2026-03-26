@@ -18,6 +18,20 @@
     <dt>総サイクル数</dt>
     <dd><%= @regimen.total_cycles ? "#{@regimen.total_cycles} サイクル" : '規定なし' %></dd>
 
+    <dt>構成薬剤</dt>
+    <dd>
+      <% @regimen.regimen_drugs.order(:sequence_number).each do |rd| %>
+        <div style="margin-bottom: 4px;">
+          <strong><%= rd.drug.abbreviation.presence || rd.drug.generic_name %></strong>
+          <% dose = rd.regimen_drug_schedules.first&.schedule_timings&.first %>
+          <% if dose %>
+            <%= dose.dose_per_time %> <%= dose.dose_unit %>
+          <% end %>
+          <span style="color: #666; font-size: 0.9em;">(<%= rd.route %>)</span>
+        </div>
+      <% end %>
+    </dd>
+
     <dt>エビデンスレベル</dt>
     <dd><span class="badge badge-success"><%= @regimen.evidence_level %></span></dd>
 
