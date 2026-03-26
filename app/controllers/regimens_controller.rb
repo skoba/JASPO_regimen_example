@@ -4,7 +4,7 @@ class RegimensController < ApplicationController
   def index
     @drug_name = params[:drug_name].to_s.strip
     @regimens = Regimen.includes(:regimen_template, :cancer_type, :reference_edition,
-                                 regimen_drugs: :drug)
+                                 regimen_drugs: { drug: [], regimen_drug_schedules: :schedule_timings })
                        .order('cancer_types.name, regimens.line_of_therapy')
 
     if @drug_name.present?

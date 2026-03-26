@@ -41,7 +41,11 @@
               <%= link_to regimen.regimen_template.name, regimen_template_path(regimen.regimen_template) %>
             </td>
             <td style="font-size: 0.9em;">
-              <%= regimen.regimen_drugs.sort_by(&:sequence_number).map { |rd| rd.drug.abbreviation.presence || rd.drug.generic_name }.join(' + ') %>
+              <%= regimen.regimen_drugs.sort_by(&:sequence_number).map { |rd|
+                    name = rd.drug.abbreviation.presence || rd.drug.generic_name
+                    dose = rd.regimen_drug_schedules.first&.schedule_timings&.first&.dose_display
+                    dose ? "#{name} #{dose}" : name
+                  }.join(' + ') %>
             </td>
             <td>
               <span class="badge badge-primary"><%= regimen.line_of_therapy %></span>
