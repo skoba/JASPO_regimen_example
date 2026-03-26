@@ -189,7 +189,7 @@
         <h1>がん化学療法レジメンマスタ <small style="font-size: 13px; font-weight: normal; opacity: 0.8;">注：これは動作確認用のサンプルです。内容はAIにて生成されたものです。</small></h1>
         <nav>
           <%= link_to 'レジメン一覧', regimens_path, class: request.path == regimens_path ? 'active' : '' %>
-          <%= link_to 'テンプレート一覧', regimen_templates_path, class: request.path == regimen_templates_path ? 'active' : '' %>
+          <%= link_to 'ベース一覧', regimen_templates_path, class: request.path == regimen_templates_path ? 'active' : '' %>
           <%= link_to 'テーブル一覧・ER図', database_schema_path, class: request.path == database_schema_path ? 'active' : '' %>
         </nav>
       </div>

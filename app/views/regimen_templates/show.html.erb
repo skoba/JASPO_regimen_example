@@ -1,9 +1,9 @@
-<%= link_to '← テンプレート一覧に戻る', regimen_templates_path, class: 'back-link' %>
+<%= link_to '← ベース一覧に戻る', regimen_templates_path, class: 'back-link' %>
 
 <h2><%= @regimen_template.name %></h2>
 
 <div class="card">
-  <div class="card-header">テンプレート情報</div>
+  <div class="card-header">ベース情報</div>
 
   <dl>
     <dt>説明</dt>
@@ -15,7 +15,7 @@
 </div>
 
 <div class="card">
-  <div class="card-header">このテンプレートを使用しているレジメン</div>
+  <div class="card-header">このベースを使用しているレジメン</div>
 
   <% if @regimen_template.regimens.any? %>
     <table>
@@ -61,6 +61,6 @@
       </tbody>
     </table>
   <% else %>
-    <p style="color: #666;">このテンプレートを使用しているレジメンはまだ登録されていません。</p>
+    <p style="color: #666;">このベースを使用しているレジメンはまだ登録されていません。</p>
   <% end %>
 </div>
