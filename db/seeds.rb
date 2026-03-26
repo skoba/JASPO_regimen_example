@@ -588,11 +588,20 @@ xelox = Regimen.find_or_create_by!(
 ) { |r| r.cycle_days = 21; r.total_cycles = 8; r.evidence_level = 'A'; r.page_reference = 'p.92' }
 
 [
-  { drug: drugs['oxaliplatin'],   route: 'IV', duration_min: 120, seq: 1 },
-  { drug: drugs['capecitabine'],  route: 'PO', duration_min: nil, seq: 2 }
+  { drug: drugs['oxaliplatin'],  route: 'IV', duration_min: 120, seq: 1, start_day: 1,  end_day: 1,  interval: nil, dose: 130,  unit: 'mg/m2' },
+  { drug: drugs['capecitabine'], route: 'PO', duration_min: nil, seq: 2, start_day: 1,  end_day: 14, interval: 1,   dose: 1000, unit: 'mg/m2' }
 ].each do |d|
-  RegimenDrug.find_or_create_by!(regimen: xelox, drug: d[:drug]) do |rd|
-    rd.route = d[:route]; rd.duration_min = d[:duration_min]; rd.sequence_number = d[:seq]
+  rd = RegimenDrug.find_or_create_by!(regimen: xelox, drug: d[:drug]) do |r|
+    r.route = d[:route]
+    r.duration_min = d[:duration_min]
+    r.sequence_number = d[:seq]
+  end
+  sched = RegimenDrugSchedule.find_or_create_by!(regimen_drug: rd, start_day: d[:start_day], end_day: d[:end_day]) do |s|
+    s.interval_days = d[:interval]
+  end
+  ScheduleTiming.find_or_create_by!(regimen_drug_schedule: sched, sequence: 1) do |st|
+    st.dose_per_time = d[:dose]
+    st.dose_unit = d[:unit]
   end
 end
 
@@ -604,11 +613,20 @@ gc = Regimen.find_or_create_by!(
 ) { |r| r.cycle_days = 21; r.total_cycles = 6; r.evidence_level = 'A'; r.page_reference = 'p.234' }
 
 [
-  { drug: drugs['gemcitabine'], route: 'IV', duration_min: 30,  seq: 1 },
-  { drug: drugs['cisplatin'],   route: 'IV', duration_min: 120, seq: 2 }
+  { drug: drugs['gemcitabine'], route: 'IV', duration_min: 30,  seq: 1, start_day: 1, end_day: 8,  interval: 7, dose: 1000, unit: 'mg/m2' },
+  { drug: drugs['cisplatin'],   route: 'IV', duration_min: 120, seq: 2, start_day: 2, end_day: 2,  interval: nil, dose: 70,  unit: 'mg/m2' }
 ].each do |d|
-  RegimenDrug.find_or_create_by!(regimen: gc, drug: d[:drug]) do |rd|
-    rd.route = d[:route]; rd.duration_min = d[:duration_min]; rd.sequence_number = d[:seq]
+  rd = RegimenDrug.find_or_create_by!(regimen: gc, drug: d[:drug]) do |r|
+    r.route = d[:route]
+    r.duration_min = d[:duration_min]
+    r.sequence_number = d[:seq]
+  end
+  sched = RegimenDrugSchedule.find_or_create_by!(regimen_drug: rd, start_day: d[:start_day], end_day: d[:end_day]) do |s|
+    s.interval_days = d[:interval]
+  end
+  ScheduleTiming.find_or_create_by!(regimen_drug_schedule: sched, sequence: 1) do |st|
+    st.dose_per_time = d[:dose]
+    st.dose_unit = d[:unit]
   end
 end
 
@@ -620,11 +638,20 @@ cbdca_ptx = Regimen.find_or_create_by!(
 ) { |r| r.cycle_days = 21; r.total_cycles = 6; r.evidence_level = 'A'; r.page_reference = 'p.189' }
 
 [
-  { drug: drugs['paclitaxel'],  route: 'IV', duration_min: 180, seq: 1 },
-  { drug: drugs['carboplatin'], route: 'IV', duration_min: 60,  seq: 2 }
+  { drug: drugs['paclitaxel'],  route: 'IV', duration_min: 180, seq: 1, start_day: 1, end_day: 1, interval: nil, dose: 175, unit: 'mg/m2' },
+  { drug: drugs['carboplatin'], route: 'IV', duration_min: 60,  seq: 2, start_day: 1, end_day: 1, interval: nil, dose: 6,   unit: 'AUC' }
 ].each do |d|
-  RegimenDrug.find_or_create_by!(regimen: cbdca_ptx, drug: d[:drug]) do |rd|
-    rd.route = d[:route]; rd.duration_min = d[:duration_min]; rd.sequence_number = d[:seq]
+  rd = RegimenDrug.find_or_create_by!(regimen: cbdca_ptx, drug: d[:drug]) do |r|
+    r.route = d[:route]
+    r.duration_min = d[:duration_min]
+    r.sequence_number = d[:seq]
+  end
+  sched = RegimenDrugSchedule.find_or_create_by!(regimen_drug: rd, start_day: d[:start_day], end_day: d[:end_day]) do |s|
+    s.interval_days = d[:interval]
+  end
+  ScheduleTiming.find_or_create_by!(regimen_drug_schedule: sched, sequence: 1) do |st|
+    st.dose_per_time = d[:dose]
+    st.dose_unit = d[:unit]
   end
 end
 
@@ -636,13 +663,22 @@ chop = Regimen.find_or_create_by!(
 ) { |r| r.cycle_days = 21; r.total_cycles = 6; r.evidence_level = 'A'; r.page_reference = 'p.278' }
 
 [
-  { drug: drugs['cyclophosphamide'], route: 'IV', duration_min: 30, seq: 1 },
-  { drug: drugs['doxorubicin'],      route: 'IV', duration_min: 15, seq: 2 },
-  { drug: drugs['vincristine'],      route: 'IV', duration_min: 10, seq: 3 },
-  { drug: drugs['prednisolone'],     route: 'PO', duration_min: nil, seq: 4 }
+  { drug: drugs['cyclophosphamide'], route: 'IV', duration_min: 30,  seq: 1, start_day: 1, end_day: 1, interval: nil, dose: 750, unit: 'mg/m2' },
+  { drug: drugs['doxorubicin'],      route: 'IV', duration_min: 15,  seq: 2, start_day: 1, end_day: 1, interval: nil, dose: 50,  unit: 'mg/m2' },
+  { drug: drugs['vincristine'],      route: 'IV', duration_min: 10,  seq: 3, start_day: 1, end_day: 1, interval: nil, dose: 1.4, unit: 'mg/m2' },
+  { drug: drugs['prednisolone'],     route: 'PO', duration_min: nil, seq: 4, start_day: 1, end_day: 5, interval: 1,   dose: 100, unit: 'mg/body' }
 ].each do |d|
-  RegimenDrug.find_or_create_by!(regimen: chop, drug: d[:drug]) do |rd|
-    rd.route = d[:route]; rd.duration_min = d[:duration_min]; rd.sequence_number = d[:seq]
+  rd = RegimenDrug.find_or_create_by!(regimen: chop, drug: d[:drug]) do |r|
+    r.route = d[:route]
+    r.duration_min = d[:duration_min]
+    r.sequence_number = d[:seq]
+  end
+  sched = RegimenDrugSchedule.find_or_create_by!(regimen_drug: rd, start_day: d[:start_day], end_day: d[:end_day]) do |s|
+    s.interval_days = d[:interval]
+  end
+  ScheduleTiming.find_or_create_by!(regimen_drug_schedule: sched, sequence: 1) do |st|
+    st.dose_per_time = d[:dose]
+    st.dose_unit = d[:unit]
   end
 end
 
@@ -654,14 +690,23 @@ rchop = Regimen.find_or_create_by!(
 ) { |r| r.cycle_days = 21; r.total_cycles = 6; r.evidence_level = 'A'; r.page_reference = 'p.280' }
 
 [
-  { drug: drugs['rituximab'],        route: 'IV', duration_min: 90, seq: 1 },
-  { drug: drugs['cyclophosphamide'], route: 'IV', duration_min: 30, seq: 2 },
-  { drug: drugs['doxorubicin'],      route: 'IV', duration_min: 15, seq: 3 },
-  { drug: drugs['vincristine'],      route: 'IV', duration_min: 10, seq: 4 },
-  { drug: drugs['prednisolone'],     route: 'PO', duration_min: nil, seq: 5 }
+  { drug: drugs['rituximab'],        route: 'IV', duration_min: 90,  seq: 1, start_day: 1, end_day: 1, interval: nil, dose: 375, unit: 'mg/m2' },
+  { drug: drugs['cyclophosphamide'], route: 'IV', duration_min: 30,  seq: 2, start_day: 1, end_day: 1, interval: nil, dose: 750, unit: 'mg/m2' },
+  { drug: drugs['doxorubicin'],      route: 'IV', duration_min: 15,  seq: 3, start_day: 1, end_day: 1, interval: nil, dose: 50,  unit: 'mg/m2' },
+  { drug: drugs['vincristine'],      route: 'IV', duration_min: 10,  seq: 4, start_day: 1, end_day: 1, interval: nil, dose: 1.4, unit: 'mg/m2' },
+  { drug: drugs['prednisolone'],     route: 'PO', duration_min: nil, seq: 5, start_day: 1, end_day: 5, interval: 1,   dose: 100, unit: 'mg/body' }
 ].each do |d|
-  RegimenDrug.find_or_create_by!(regimen: rchop, drug: d[:drug]) do |rd|
-    rd.route = d[:route]; rd.duration_min = d[:duration_min]; rd.sequence_number = d[:seq]
+  rd = RegimenDrug.find_or_create_by!(regimen: rchop, drug: d[:drug]) do |r|
+    r.route = d[:route]
+    r.duration_min = d[:duration_min]
+    r.sequence_number = d[:seq]
+  end
+  sched = RegimenDrugSchedule.find_or_create_by!(regimen_drug: rd, start_day: d[:start_day], end_day: d[:end_day]) do |s|
+    s.interval_days = d[:interval]
+  end
+  ScheduleTiming.find_or_create_by!(regimen_drug_schedule: sched, sequence: 1) do |st|
+    st.dose_per_time = d[:dose]
+    st.dose_unit = d[:unit]
   end
 end
 
@@ -672,8 +717,15 @@ pembro = Regimen.find_or_create_by!(
   line_of_therapy: '1st'
 ) { |r| r.cycle_days = 21; r.evidence_level = 'A'; r.page_reference = 'p.138' }
 
-RegimenDrug.find_or_create_by!(regimen: pembro, drug: drugs['pembrolizumab']) do |rd|
-  rd.route = 'IV'; rd.duration_min = 30; rd.sequence_number = 1
+rd = RegimenDrug.find_or_create_by!(regimen: pembro, drug: drugs['pembrolizumab']) do |r|
+  r.route = 'IV'
+  r.duration_min = 30
+  r.sequence_number = 1
+end
+sched = RegimenDrugSchedule.find_or_create_by!(regimen_drug: rd, start_day: 1, end_day: 1)
+ScheduleTiming.find_or_create_by!(regimen_drug_schedule: sched, sequence: 1) do |st|
+  st.dose_per_time = 200
+  st.dose_unit = 'mg/body'
 end
 
 puts 'Seeding completed!'
