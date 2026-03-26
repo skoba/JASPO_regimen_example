@@ -497,12 +497,16 @@ folfox = Regimen.find_or_create_by!(
 ) { |r| r.cycle_days = 14; r.total_cycles = 12; r.evidence_level = 'A'; r.page_reference = 'p.45' }
 
 [
-  { drug: drugs['oxaliplatin'],   route: 'IV', duration_min: 120, seq: 1 },
-  { drug: drugs['leucovorin'],    route: 'IV', duration_min: 120, seq: 2 },
-  { drug: drugs['fluorouracil'],  route: 'IV', duration_min: 46 * 60, seq: 3 }
+  { drug: drugs['oxaliplatin'],  route: 'IV', duration_min: 120,      seq: 1, start_day: 1, end_day: 1, dose: 85,   unit: 'mg/m2' },
+  { drug: drugs['leucovorin'],   route: 'IV', duration_min: 120,      seq: 2, start_day: 1, end_day: 1, dose: 400,  unit: 'mg/m2' },
+  { drug: drugs['fluorouracil'], route: 'IV', duration_min: 46 * 60,  seq: 3, start_day: 1, end_day: 2, dose: 2400, unit: 'mg/m2' }
 ].each do |d|
-  RegimenDrug.find_or_create_by!(regimen: folfox, drug: d[:drug]) do |rd|
-    rd.route = d[:route]; rd.duration_min = d[:duration_min]; rd.sequence_number = d[:seq]
+  rd = RegimenDrug.find_or_create_by!(regimen: folfox, drug: d[:drug]) do |r|
+    r.route = d[:route]; r.duration_min = d[:duration_min]; r.sequence_number = d[:seq]
+  end
+  sched = RegimenDrugSchedule.find_or_create_by!(regimen_drug: rd, start_day: d[:start_day], end_day: d[:end_day])
+  ScheduleTiming.find_or_create_by!(regimen_drug_schedule: sched, sequence: 1) do |st|
+    st.dose_per_time = d[:dose]; st.dose_unit = d[:unit]
   end
 end
 
@@ -514,12 +518,19 @@ folfiri = Regimen.find_or_create_by!(
 ) { |r| r.cycle_days = 14; r.total_cycles = 12; r.evidence_level = 'A'; r.page_reference = 'p.48' }
 
 [
-  { drug: drugs['irinotecan'],    route: 'IV', duration_min: 90, seq: 1 },
-  { drug: drugs['leucovorin'],    route: 'IV', duration_min: 120, seq: 2 },
-  { drug: drugs['fluorouracil'],  route: 'IV', duration_min: 46 * 60, seq: 3 }
+  { drug: drugs['irinotecan'],   route: 'IV', duration_min: 90,     seq: 1, start_day: 1, end_day: 1, dose: 180,  unit: 'mg/m2' },
+  { drug: drugs['leucovorin'],   route: 'IV', duration_min: 120,    seq: 2, start_day: 1, end_day: 1, dose: 400,  unit: 'mg/m2' },
+  { drug: drugs['fluorouracil'], route: 'IV', duration_min: 46 * 60, seq: 3, start_day: 1, end_day: 2, dose: 2400, unit: 'mg/m2' }
 ].each do |d|
-  RegimenDrug.find_or_create_by!(regimen: folfiri, drug: d[:drug]) do |rd|
-    rd.route = d[:route]; rd.duration_min = d[:duration_min]; rd.sequence_number = d[:seq]
+  rd = RegimenDrug.find_or_create_by!(regimen: folfiri, drug: d[:drug]) do |r|
+    r.route = d[:route]
+    r.duration_min = d[:duration_min]
+    r.sequence_number = d[:seq]
+  end
+  sched = RegimenDrugSchedule.find_or_create_by!(regimen_drug: rd, start_day: d[:start_day], end_day: d[:end_day])
+  ScheduleTiming.find_or_create_by!(regimen_drug_schedule: sched, sequence: 1) do |st|
+    st.dose_per_time = d[:dose]
+    st.dose_unit = d[:unit]
   end
 end
 
@@ -531,11 +542,18 @@ ac = Regimen.find_or_create_by!(
 ) { |r| r.cycle_days = 21; r.total_cycles = 4; r.evidence_level = 'A'; r.page_reference = 'p.156' }
 
 [
-  { drug: drugs['doxorubicin'],       route: 'IV', duration_min: 15, seq: 1 },
-  { drug: drugs['cyclophosphamide'],  route: 'IV', duration_min: 30, seq: 2 }
+  { drug: drugs['doxorubicin'],      route: 'IV', duration_min: 15, seq: 1, start_day: 1, end_day: 1, dose: 60,  unit: 'mg/m2' },
+  { drug: drugs['cyclophosphamide'], route: 'IV', duration_min: 30, seq: 2, start_day: 1, end_day: 1, dose: 600, unit: 'mg/m2' }
 ].each do |d|
-  RegimenDrug.find_or_create_by!(regimen: ac, drug: d[:drug]) do |rd|
-    rd.route = d[:route]; rd.duration_min = d[:duration_min]; rd.sequence_number = d[:seq]
+  rd = RegimenDrug.find_or_create_by!(regimen: ac, drug: d[:drug]) do |r|
+    r.route = d[:route]
+    r.duration_min = d[:duration_min]
+    r.sequence_number = d[:seq]
+  end
+  sched = RegimenDrugSchedule.find_or_create_by!(regimen_drug: rd, start_day: d[:start_day], end_day: d[:end_day])
+  ScheduleTiming.find_or_create_by!(regimen_drug_schedule: sched, sequence: 1) do |st|
+    st.dose_per_time = d[:dose]
+    st.dose_unit = d[:unit]
   end
 end
 
@@ -547,11 +565,18 @@ tc = Regimen.find_or_create_by!(
 ) { |r| r.cycle_days = 21; r.total_cycles = 4; r.evidence_level = 'A'; r.page_reference = 'p.158' }
 
 [
-  { drug: drugs['docetaxel'],         route: 'IV', duration_min: 60,  seq: 1 },
-  { drug: drugs['cyclophosphamide'],  route: 'IV', duration_min: 30,  seq: 2 }
+  { drug: drugs['docetaxel'],        route: 'IV', duration_min: 60, seq: 1, start_day: 1, end_day: 1, dose: 75,  unit: 'mg/m2' },
+  { drug: drugs['cyclophosphamide'], route: 'IV', duration_min: 30, seq: 2, start_day: 1, end_day: 1, dose: 600, unit: 'mg/m2' }
 ].each do |d|
-  RegimenDrug.find_or_create_by!(regimen: tc, drug: d[:drug]) do |rd|
-    rd.route = d[:route]; rd.duration_min = d[:duration_min]; rd.sequence_number = d[:seq]
+  rd = RegimenDrug.find_or_create_by!(regimen: tc, drug: d[:drug]) do |r|
+    r.route = d[:route]
+    r.duration_min = d[:duration_min]
+    r.sequence_number = d[:seq]
+  end
+  sched = RegimenDrugSchedule.find_or_create_by!(regimen_drug: rd, start_day: d[:start_day], end_day: d[:end_day])
+  ScheduleTiming.find_or_create_by!(regimen_drug_schedule: sched, sequence: 1) do |st|
+    st.dose_per_time = d[:dose]
+    st.dose_unit = d[:unit]
   end
 end
 
